@@ -115,7 +115,14 @@ public class AccountListActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_accounts, menu);
+        updateHideCodesIcon(menu.findItem(R.id.action_toggle_hide));
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        updateHideCodesIcon(menu.findItem(R.id.action_toggle_hide));
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -125,6 +132,7 @@ public class AccountListActivity extends AppCompatActivity {
             hideCodes = !hideCodes;
             App.get().preferences().setUseHiddenTotp(hideCodes);
             adapter.submit(DataSession.get().getAccounts(), hideCodes);
+            invalidateOptionsMenu();
             return true;
         }
         if (id == R.id.action_manage_files) {
@@ -141,6 +149,13 @@ public class AccountListActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateHideCodesIcon(@Nullable MenuItem item) {
+        if (item == null) {
+            return;
+        }
+        item.setIcon(hideCodes ? R.drawable.ic_visibility_off : R.drawable.ic_visibility);
     }
 
     private void confirmDelete(TwoFACodeModel model) {

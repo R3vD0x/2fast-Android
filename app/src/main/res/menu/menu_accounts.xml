@@ -3,8 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_toggle_hide"
+        android:icon="@drawable/ic_visibility"
         android:title="@string/toggle_hide_codes"
-        app:showAsAction="never" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_manage_files"
         android:title="@string/manage_datafiles"

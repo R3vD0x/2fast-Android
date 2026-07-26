@@ -23,6 +23,7 @@ import br.com.itisoft.a2fast.model.DatafileEntry;
 public class OpenDataFileActivity extends AppCompatActivity {
 
     private TextView selectedFile;
+    private TextInputEditText inputFileName;
     private TextInputEditText inputPassword;
     private Uri selectedUri;
 
@@ -33,6 +34,10 @@ public class OpenDataFileActivity extends AppCompatActivity {
                 }
                 selectedUri = uri;
                 selectedFile.setText(uri.toString());
+                String suggested = displayNameFromUri(uri);
+                if (inputFileName.getText() == null || inputFileName.getText().toString().trim().isEmpty()) {
+                    inputFileName.setText(suggested);
+                }
             });
 
     @Override
@@ -45,6 +50,7 @@ public class OpenDataFileActivity extends AppCompatActivity {
         }
 
         selectedFile = findViewById(R.id.textSelectedFile);
+        inputFileName = findViewById(R.id.inputFileName);
         inputPassword = findViewById(R.id.inputPassword);
         Button pick = findViewById(R.id.btnPickFile);
         Button open = findViewById(R.id.btnOpenFile);
@@ -76,13 +82,9 @@ public class OpenDataFileActivity extends AppCompatActivity {
             }
 
             String hash = CryptoService.createStringHash(password);
-            String name = selectedUri.getLastPathSegment();
-            if (name == null || name.isEmpty()) {
-                name = "datafile.2fa";
-            }
-            int slash = Math.max(name.lastIndexOf('/'), name.lastIndexOf(':'));
-            if (slash >= 0 && slash < name.length() - 1) {
-                name = name.substring(slash + 1);
+            String name = inputFileName.getText() == null ? "" : inputFileName.getText().toString().trim();
+            if (name.isEmpty()) {
+                name = displayNameFromUri(selectedUri);
             }
 
             DatafileEntry entry = App.get().preferences().addOrUpdateDatafile(name, selectedUri.toString(), hash);
@@ -101,6 +103,18 @@ public class OpenDataFileActivity extends AppCompatActivity {
         } catch (Exception e) {
             toast(R.string.error_wrong_password);
         }
+    }
+
+    private static String displayNameFromUri(Uri uri) {
+        String name = uri.getLastPathSegment();
+        if (name == null || name.isEmpty()) {
+            return "datafile.2fa";
+        }
+        int slash = Math.max(name.lastIndexOf('/'), name.lastIndexOf(':'));
+        if (slash >= 0 && slash < name.length() - 1) {
+            name = name.substring(slash + 1);
+        }
+        return name;
     }
 
     private void toast(int resId) {
