@@ -29,6 +29,9 @@
     <string name="add_account_title">Добавить учётную запись</string>
     <string name="hint_otpauth">URI otpauth:// (необязательно)</string>
     <string name="parse_otpauth">Импортировать URI</string>
+    <string name="scan_qr">Сканировать QR</string>
+    <string name="scan_qr_title">Сканировать QR-код</string>
+    <string name="scan_qr_hint">Наведите камеру на QR-код otpauth://</string>
     <string name="hint_label">Метка</string>
     <string name="hint_issuer">Издатель</string>
     <string name="hint_secret">Секрет Base32</string>
@@ -55,4 +58,6 @@
     <string name="error_invalid_otpauth">Недействительный URI otpauth</string>
     <string name="error_label_required">Введите метку</string>
     <string name="error_add_account">Не удалось добавить учётную запись</string>
+    <string name="error_camera_permission">Для сканирования QR-кода требуется доступ к камере</string>
+    <string name="error_camera">Не удалось запустить камеру</string>
 </resources>

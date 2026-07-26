@@ -29,6 +29,9 @@
     <string name="add_account_title">Añadir cuenta</string>
     <string name="hint_otpauth">URI otpauth:// (opcional)</string>
     <string name="parse_otpauth">Importar URI</string>
+    <string name="scan_qr">Leer QR</string>
+    <string name="scan_qr_title">Leer código QR</string>
+    <string name="scan_qr_hint">Apunta la cámara al código QR otpauth://</string>
     <string name="hint_label">Etiqueta</string>
     <string name="hint_issuer">Emisor</string>
     <string name="hint_secret">Secreto Base32</string>
@@ -55,4 +58,6 @@
     <string name="error_invalid_otpauth">URI otpauth no válida</string>
     <string name="error_label_required">Introduce una etiqueta</string>
     <string name="error_add_account">No se pudo añadir la cuenta</string>
+    <string name="error_camera_permission">Se necesita permiso de cámara para leer el código QR</string>
+    <string name="error_camera">No se pudo iniciar la cámara</string>
 </resources>

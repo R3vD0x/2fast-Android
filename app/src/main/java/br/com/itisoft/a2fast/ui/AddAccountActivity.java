@@ -1,5 +1,6 @@
 package br.com.itisoft.a2fast.ui;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
@@ -7,6 +8,8 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -21,6 +24,27 @@ import br.com.itisoft.a2fast.parser.OtpAuthParser;
 
 public class AddAccountActivity extends AppCompatActivity {
 
+    private TextInputEditText inputLabel;
+    private TextInputEditText inputIssuer;
+    private TextInputEditText inputSecret;
+    private TextInputEditText inputOtpAuth;
+    private AutoCompleteTextView inputAlgorithm;
+    private TextInputEditText inputPeriod;
+    private TextInputEditText inputDigits;
+
+    private final ActivityResultLauncher<Intent> scanQrLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() != RESULT_OK || result.getData() == null) {
+                    return;
+                }
+                String qrContent = result.getData().getStringExtra(QrScanActivity.EXTRA_QR_CONTENT);
+                if (qrContent == null || qrContent.isEmpty()) {
+                    return;
+                }
+                inputOtpAuth.setText(qrContent);
+                applyOtpAuthUri(qrContent);
+            });
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,15 +54,16 @@ public class AddAccountActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        TextInputEditText inputLabel = findViewById(R.id.inputLabel);
-        TextInputEditText inputIssuer = findViewById(R.id.inputIssuer);
-        TextInputEditText inputSecret = findViewById(R.id.inputSecret);
-        TextInputEditText inputOtpAuth = findViewById(R.id.inputOtpAuth);
-        AutoCompleteTextView inputAlgorithm = findViewById(R.id.inputAlgorithm);
-        TextInputEditText inputPeriod = findViewById(R.id.inputPeriod);
-        TextInputEditText inputDigits = findViewById(R.id.inputDigits);
+        inputLabel = findViewById(R.id.inputLabel);
+        inputIssuer = findViewById(R.id.inputIssuer);
+        inputSecret = findViewById(R.id.inputSecret);
+        inputOtpAuth = findViewById(R.id.inputOtpAuth);
+        inputAlgorithm = findViewById(R.id.inputAlgorithm);
+        inputPeriod = findViewById(R.id.inputPeriod);
+        inputDigits = findViewById(R.id.inputDigits);
         Button save = findViewById(R.id.btnSaveAccount);
         Button parseUri = findViewById(R.id.btnParseUri);
+        Button scanQr = findViewById(R.id.btnScanQr);
 
         String[] algorithms = new String[]{"SHA1", "SHA256", "SHA512"};
         inputAlgorithm.setAdapter(new ArrayAdapter<>(this,
@@ -47,26 +72,16 @@ public class AddAccountActivity extends AppCompatActivity {
         inputPeriod.setText("30");
         inputDigits.setText("6");
 
+        scanQr.setOnClickListener(v ->
+                scanQrLauncher.launch(new Intent(this, QrScanActivity.class)));
+
         parseUri.setOnClickListener(v -> {
             String uri = text(inputOtpAuth);
             if (uri.isEmpty()) {
                 toast(R.string.error_otpauth_required);
                 return;
             }
-            try {
-                TwoFACodeModel model = OtpAuthParser.toAccount(uri);
-                inputLabel.setText(model.Label);
-                inputIssuer.setText(model.Issuer);
-                inputAlgorithm.setText(model.HashMode.name().replace("Sha", "SHA"), false);
-                inputPeriod.setText(String.valueOf(model.Period));
-                inputDigits.setText(String.valueOf(model.TotpSize));
-                // Secret is already decoded; show that URI was accepted
-                inputSecret.setText("********");
-                inputSecret.setTag(model);
-                toast(R.string.otpauth_parsed);
-            } catch (Exception e) {
-                toast(R.string.error_invalid_otpauth);
-            }
+            applyOtpAuthUri(uri);
         });
 
         save.setOnClickListener(v -> {
@@ -113,6 +128,22 @@ public class AddAccountActivity extends AppCompatActivity {
                 toast(R.string.error_add_account);
             }
         });
+    }
+
+    private void applyOtpAuthUri(String uri) {
+        try {
+            TwoFACodeModel model = OtpAuthParser.toAccount(uri);
+            inputLabel.setText(model.Label);
+            inputIssuer.setText(model.Issuer);
+            inputAlgorithm.setText(model.HashMode.name().replace("Sha", "SHA"), false);
+            inputPeriod.setText(String.valueOf(model.Period));
+            inputDigits.setText(String.valueOf(model.TotpSize));
+            inputSecret.setText("********");
+            inputSecret.setTag(model);
+            toast(R.string.otpauth_parsed);
+        } catch (Exception e) {
+            toast(R.string.error_invalid_otpauth);
+        }
     }
 
     private static String text(TextInputEditText editText) {
