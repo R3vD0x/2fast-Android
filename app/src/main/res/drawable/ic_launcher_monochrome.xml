@@ -4,26 +4,22 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Shield body (safe zone ~66dp) -->
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M54,26 C54,26 74,32 76,34 C76,34 76,58 76,60 C76,72 66,80 54,84 C42,80 32,72 32,60 C32,58 32,34 32,34 C34,32 54,26 54,26 Z" />
-    <!-- Inner shield cutout -->
     <path
-        android:fillColor="#0D47A1"
+        android:fillColor="#000000"
         android:pathData="M54,32 C54,32 69,37 70.5,38.2 C70.5,38.2 70.5,57.5 70.5,58.5 C70.5,67.5 62.5,74 54,77.2 C45.5,74 37.5,67.5 37.5,58.5 C37.5,57.5 37.5,38.2 37.5,38.2 C39,37 54,32 54,32 Z" />
-    <!-- OTP digit bars -->
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M42,48 h8 a2,2 0 0 1 2,2 v6 a2,2 0 0 1 -2,2 h-8 a2,2 0 0 1 -2,-2 v-6 a2,2 0 0 1 2,-2 Z" />
     <path
-        android:fillColor="#4DB6AC"
+        android:fillColor="#FFFFFF"
         android:pathData="M50,48 h8 a2,2 0 0 1 2,2 v6 a2,2 0 0 1 -2,2 h-8 a2,2 0 0 1 -2,-2 v-6 a2,2 0 0 1 2,-2 Z" />
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M58,48 h8 a2,2 0 0 1 2,2 v6 a2,2 0 0 1 -2,2 h-8 a2,2 0 0 1 -2,-2 v-6 a2,2 0 0 1 2,-2 Z" />
-    <!-- Speed accent under digits -->
     <path
-        android:fillColor="#4DB6AC"
+        android:fillColor="#FFFFFF"
         android:pathData="M44,64 h20 a1.5,1.5 0 0 1 0,3 h-20 a1.5,1.5 0 0 1 0,-3 Z" />
 </vector>

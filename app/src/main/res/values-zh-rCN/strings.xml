@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">2Fast</string>
     <string name="welcome_subtitle">本地 TOTP 身份验证器。您的密钥保存在由您掌控的加密 .2fa 文件中。</string>
+    <string name="welcome_offline_hint">可离线使用 · 无需账号 · 无需云端</string>
     <string name="create_datafile">创建 .2fa 文件</string>
     <string name="open_datafile">打开 .2fa 文件</string>
     <string name="create_datafile_title">新建文件</string>
@@ -27,6 +28,11 @@
     <string name="datafile_removed">已从列表中移除文件</string>
     <string name="empty_accounts">暂无账户。\n点按 + 以添加。</string>
     <string name="add_account_title">添加账户</string>
+    <string name="add_account_import_section">导入</string>
+    <string name="add_account_manual_section">或手动填写</string>
+    <string name="account_actions">账户操作</string>
+    <string name="file_actions">文件操作</string>
+    <string name="tap_to_copy">点按复制</string>
     <string name="hint_otpauth">otpauth:// URI（可选）</string>
     <string name="parse_otpauth">导入 URI</string>
     <string name="scan_qr">扫描二维码</string>

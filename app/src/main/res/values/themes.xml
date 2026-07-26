@@ -8,5 +8,26 @@
         <item name="colorOnSecondary">@color/white</item>
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <item name="android:windowBackground">@color/surface</item>
+        <item name="materialCardViewStyle">@style/Widget._2Fast.Card</item>
+        <item name="floatingActionButtonStyle">@style/Widget._2Fast.Fab</item>
+    </style>
+
+    <style name="Widget._2Fast.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/card_surface</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">1dp</item>
+        <item name="strokeWidth">0dp</item>
+    </style>
+
+    <style name="Widget._2Fast.Fab" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="backgroundTint">?attr/colorSecondary</item>
+        <item name="tint">@color/white</item>
+        <item name="elevation">6dp</item>
+    </style>
+
+    <style name="Theme._2Fast.Splash" parent="Theme._2Fast">
+        <item name="android:windowBackground">@color/blue_700</item>
+        <item name="android:statusBarColor">@color/blue_700</item>
+        <item name="android:navigationBarColor">@color/blue_700</item>
     </style>
 </resources>

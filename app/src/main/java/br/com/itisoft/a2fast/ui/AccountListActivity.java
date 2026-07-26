@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,10 +23,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +44,8 @@ public class AccountListActivity extends AppCompatActivity {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private AccountAdapter adapter;
-    private TextView emptyView;
+    private View emptyContainer;
+    private View coordinator;
     private boolean hideCodes;
 
     private final Runnable tick = new Runnable() {
@@ -68,16 +74,18 @@ public class AccountListActivity extends AppCompatActivity {
         }
 
         hideCodes = App.get().preferences().useHiddenTotp();
-        emptyView = findViewById(R.id.textEmpty);
+        emptyContainer = findViewById(R.id.emptyAccounts);
+        coordinator = findViewById(R.id.coordinatorAccounts);
         RecyclerView list = findViewById(R.id.recyclerAccounts);
         FloatingActionButton fab = findViewById(R.id.fabAdd);
+        View emptyAdd = findViewById(R.id.btnEmptyAdd);
 
         adapter = new AccountAdapter(new AccountAdapter.Listener() {
             @Override
             public void onCopy(TwoFACodeModel model) {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 clipboard.setPrimaryClip(ClipData.newPlainText("totp", model.TwoFACode));
-                Toast.makeText(AccountListActivity.this, R.string.code_copied, Toast.LENGTH_SHORT).show();
+                Snackbar.make(coordinator, R.string.code_copied, Snackbar.LENGTH_SHORT).show();
             }
 
             @Override
@@ -88,7 +96,9 @@ public class AccountListActivity extends AppCompatActivity {
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
-        fab.setOnClickListener(v -> startActivity(new Intent(this, AddAccountActivity.class)));
+        View.OnClickListener addClick = v -> startActivity(new Intent(this, AddAccountActivity.class));
+        fab.setOnClickListener(addClick);
+        emptyAdd.setOnClickListener(addClick);
         refreshEmptyState();
     }
 
@@ -189,7 +199,7 @@ public class AccountListActivity extends AppCompatActivity {
 
     private void refreshEmptyState() {
         boolean empty = DataSession.get().getAccounts().isEmpty();
-        emptyView.setVisibility(empty ? View.VISIBLE : View.GONE);
+        emptyContainer.setVisibility(empty ? View.VISIBLE : View.GONE);
     }
 
     static final class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.Holder> {
@@ -226,12 +236,20 @@ public class AccountListActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(@NonNull Holder holder, int position) {
             TwoFACodeModel model = items.get(position);
+            Context context = holder.itemView.getContext();
+
             String title = model.Label;
             if (model.Issuer != null && !model.Issuer.isEmpty()
                     && !model.Issuer.equalsIgnoreCase(model.Label)) {
                 title = model.Issuer + " · " + model.Label;
             }
             holder.title.setText(title);
+
+            String avatarSource = model.Issuer != null && !model.Issuer.isEmpty()
+                    ? model.Issuer
+                    : (model.Label != null ? model.Label : "?");
+            holder.avatar.setText(String.valueOf(Character.toUpperCase(avatarSource.charAt(0))));
+
             String code = model.TwoFACode == null ? "" : model.TwoFACode;
             if (hideCodes && code.length() >= 2 && !"Error".equals(code)) {
                 holder.code.setText(code.replaceAll(".", "•"));
@@ -240,16 +258,36 @@ public class AccountListActivity extends AppCompatActivity {
             } else {
                 holder.code.setText(code);
             }
+
             int max = Math.max(model.Period, 1);
             int remaining = (int) Math.max(0, Math.min(max, model.Seconds));
             holder.progress.setMax(max);
             holder.progress.setProgress(remaining);
-            holder.seconds.setText(holder.itemView.getContext()
-                    .getString(R.string.seconds_remaining, remaining));
+            holder.seconds.setText(context.getString(R.string.seconds_remaining, remaining));
+
+            Drawable progressDrawable = ContextCompat.getDrawable(context,
+                    remaining <= 5 ? R.drawable.progress_totp_urgent : R.drawable.progress_totp);
+            if (progressDrawable != null) {
+                holder.progress.setProgressDrawable(progressDrawable.mutate());
+                holder.progress.setProgress(remaining);
+            }
+
             holder.itemView.setOnClickListener(v -> listener.onCopy(model));
             holder.itemView.setOnLongClickListener(v -> {
                 listener.onDelete(model);
                 return true;
+            });
+            holder.more.setOnClickListener(v -> {
+                PopupMenu popup = new PopupMenu(context, v);
+                popup.getMenu().add(0, 1, 0, R.string.delete);
+                popup.setOnMenuItemClickListener(item -> {
+                    if (item.getItemId() == 1) {
+                        listener.onDelete(model);
+                        return true;
+                    }
+                    return false;
+                });
+                popup.show();
             });
         }
 
@@ -259,17 +297,21 @@ public class AccountListActivity extends AppCompatActivity {
         }
 
         static final class Holder extends RecyclerView.ViewHolder {
+            final TextView avatar;
             final TextView title;
             final TextView code;
             final TextView seconds;
             final ProgressBar progress;
+            final ImageButton more;
 
             Holder(@NonNull View itemView) {
                 super(itemView);
+                avatar = itemView.findViewById(R.id.textAvatar);
                 title = itemView.findViewById(R.id.textTitle);
                 code = itemView.findViewById(R.id.textCode);
                 seconds = itemView.findViewById(R.id.textSeconds);
                 progress = itemView.findViewById(R.id.progressSeconds);
+                more = itemView.findViewById(R.id.btnMore);
             }
         }
     }

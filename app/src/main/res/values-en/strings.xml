@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">2Fast</string>
     <string name="welcome_subtitle">Local TOTP authenticator. Your secrets stay in an encrypted .2fa file that you control.</string>
+    <string name="welcome_offline_hint">Works offline · No account · No cloud required</string>
     <string name="create_datafile">Create .2fa file</string>
     <string name="open_datafile">Open .2fa file</string>
     <string name="create_datafile_title">New file</string>
@@ -27,6 +28,11 @@
     <string name="datafile_removed">File removed from list</string>
     <string name="empty_accounts">No accounts yet.\nTap + to add one.</string>
     <string name="add_account_title">Add account</string>
+    <string name="add_account_import_section">Import</string>
+    <string name="add_account_manual_section">Or fill in manually</string>
+    <string name="account_actions">Account actions</string>
+    <string name="file_actions">File actions</string>
+    <string name="tap_to_copy">Tap to copy</string>
     <string name="hint_otpauth">otpauth:// URI (optional)</string>
     <string name="parse_otpauth">Import URI</string>
     <string name="scan_qr">Scan QR code</string>

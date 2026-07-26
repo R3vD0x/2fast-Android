@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">2Fast</string>
     <string name="welcome_subtitle">Autenticador TOTP local. Seus segredos ficam em um arquivo .2fa criptografado que você controla.</string>
+    <string name="welcome_offline_hint">Funciona offline · Sem conta · Sem nuvem obrigatória</string>
     <string name="create_datafile">Criar arquivo .2fa</string>
     <string name="open_datafile">Abrir arquivo .2fa</string>
     <string name="create_datafile_title">Novo arquivo</string>
@@ -25,8 +26,13 @@
     <string name="remove_datafile_message">Remover %1$s do app?\nO arquivo no armazenamento não será apagado.</string>
     <string name="remove_from_app">Remover</string>
     <string name="datafile_removed">Arquivo removido da lista</string>
-    <string name="empty_accounts">Nenhuma conta ainda.\nToque em + para adicionar.</string>
+    <string name="empty_accounts">Nenhuma conta ainda.\nToque em + para adicionar uma.</string>
     <string name="add_account_title">Adicionar conta</string>
+    <string name="add_account_import_section">Importar</string>
+    <string name="add_account_manual_section">Ou preencha manualmente</string>
+    <string name="account_actions">Ações da conta</string>
+    <string name="file_actions">Ações do arquivo</string>
+    <string name="tap_to_copy">Toque para copiar</string>
     <string name="hint_otpauth">URI otpauth:// (opcional)</string>
     <string name="parse_otpauth">Importar URI</string>
     <string name="scan_qr">Ler QR code</string>

@@ -1,23 +1,26 @@
 package br.com.itisoft.a2fast.ui;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +38,8 @@ public class DataFilesActivity extends AppCompatActivity {
     public static final String EXTRA_MANAGE_ONLY = "manage_only";
 
     private DatafileAdapter adapter;
-    private TextView emptyView;
+    private View emptyContainer;
+    private View coordinator;
     private boolean manageOnly;
 
     @Override
@@ -51,9 +55,11 @@ public class DataFilesActivity extends AppCompatActivity {
             }
         }
 
-        emptyView = findViewById(R.id.textEmptyFiles);
+        emptyContainer = findViewById(R.id.emptyDatafiles);
+        coordinator = findViewById(R.id.coordinatorDatafiles);
         RecyclerView list = findViewById(R.id.recyclerDatafiles);
         FloatingActionButton fab = findViewById(R.id.fabAddDatafile);
+        View emptyAdd = findViewById(R.id.btnEmptyAddFile);
 
         adapter = new DatafileAdapter(new DatafileAdapter.Listener() {
             @Override
@@ -69,7 +75,9 @@ public class DataFilesActivity extends AppCompatActivity {
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
-        fab.setOnClickListener(v -> showAddOptions());
+        View.OnClickListener addClick = v -> showAddOptions();
+        fab.setOnClickListener(addClick);
+        emptyAdd.setOnClickListener(addClick);
     }
 
     @Override
@@ -113,7 +121,7 @@ public class DataFilesActivity extends AppCompatActivity {
         List<DatafileEntry> files = App.get().preferences().getDatafiles();
         String activeId = App.get().preferences().getActiveDatafileId();
         adapter.submit(files, activeId);
-        emptyView.setVisibility(files.isEmpty() ? View.VISIBLE : View.GONE);
+        emptyContainer.setVisibility(files.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private void showAddOptions() {
@@ -157,7 +165,7 @@ public class DataFilesActivity extends AppCompatActivity {
                         DataSession.get().lock();
                     }
                     refreshList();
-                    Toast.makeText(this, R.string.datafile_removed, Toast.LENGTH_SHORT).show();
+                    Snackbar.make(coordinator, R.string.datafile_removed, Snackbar.LENGTH_SHORT).show();
                     if (!App.get().preferences().hasConfiguredDatafile() && !manageOnly) {
                         Intent intent = new Intent(this, WelcomeActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -204,7 +212,7 @@ public class DataFilesActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull Holder holder, int position) {
             DatafileEntry entry = items.get(position);
             holder.title.setText(entry.displayName);
-            holder.subtitle.setText(entry.uri);
+            holder.subtitle.setText(friendlyLocation(entry.uri));
             boolean active = entry.id != null && entry.id.equals(activeId);
             holder.badge.setVisibility(active ? View.VISIBLE : View.GONE);
             holder.itemView.setOnClickListener(v -> listener.onOpen(entry));
@@ -212,6 +220,39 @@ public class DataFilesActivity extends AppCompatActivity {
                 listener.onRemove(entry);
                 return true;
             });
+            holder.more.setOnClickListener(v -> {
+                PopupMenu popup = new PopupMenu(v.getContext(), v);
+                popup.getMenu().add(0, 1, 0, R.string.remove_from_app);
+                popup.setOnMenuItemClickListener(item -> {
+                    if (item.getItemId() == 1) {
+                        listener.onRemove(entry);
+                        return true;
+                    }
+                    return false;
+                });
+                popup.show();
+            });
+        }
+
+        private static String friendlyLocation(String uriString) {
+            if (uriString == null || uriString.isEmpty()) {
+                return "";
+            }
+            try {
+                Uri uri = Uri.parse(uriString);
+                String last = uri.getLastPathSegment();
+                if (last != null && !last.isEmpty()) {
+                    // SAF often encodes the display path after a colon.
+                    int colon = last.lastIndexOf(':');
+                    if (colon >= 0 && colon < last.length() - 1) {
+                        last = last.substring(colon + 1);
+                    }
+                    return last.replace("%2F", "/").replace("%20", " ");
+                }
+            } catch (Exception ignored) {
+                // fall through
+            }
+            return uriString;
         }
 
         @Override
@@ -223,12 +264,14 @@ public class DataFilesActivity extends AppCompatActivity {
             final TextView title;
             final TextView subtitle;
             final TextView badge;
+            final ImageButton more;
 
             Holder(@NonNull View itemView) {
                 super(itemView);
                 title = itemView.findViewById(R.id.textFileName);
                 subtitle = itemView.findViewById(R.id.textFileUri);
                 badge = itemView.findViewById(R.id.textActiveBadge);
+                more = itemView.findViewById(R.id.btnMoreFile);
             }
         }
     }
